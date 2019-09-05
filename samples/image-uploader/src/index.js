@@ -146,6 +146,9 @@ class App extends React.Component {
 
   onClickRemove = () => {
     this.unlinkAsset();
+    if (this.state.focalPointEnabled) {
+      this.onSetFocalPoint(null);
+    }
   };
 
   onToggleFocalPointSelection = () =>
@@ -167,6 +170,7 @@ class App extends React.Component {
     });
 
     field.setValue(focalPoint);
+    console.log(focalPoint);
   };
 
   onDragOverEnd = () => {
