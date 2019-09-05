@@ -12,6 +12,10 @@ export default function FileView(props) {
   const prettySize = `${(file.details.size / 1000000).toFixed(2)} MB`;
 
   const onImageClick = e => {
+    if (!props.selectingFocalPoint) {
+      return;
+    }
+
     const rect = e.target.getBoundingClientRect();
     const x = e.clientX - rect.left; //x position within the element.
     const y = e.clientY - rect.top; //y position within the element.
@@ -26,7 +30,7 @@ export default function FileView(props) {
 
     props.onSetFocalPoint({
       x: rect.left + x,
-      y: rect.top + y,
+      y: rect.top + y
     });
     console.log(actualX, actualY);
   };
@@ -39,10 +43,14 @@ export default function FileView(props) {
       onDragOverStart={props.onDragOverStart}
       onDragOverEnd={props.onDragOverEnd}>
       {type === 'image' ? (
-        <header style={{ height: '300px' }}>
+        <header
+          style={{
+            height: '300px',
+            cursor: props.selectingFocalPoint ? 'crosshair' : 'auto'
+          }}>
           <div style={{ position: 'relative' }}>
             <img
-              style={{ display: 'block', margin: '0 auto', maxWidth: '100%' }}
+              style={{ display: 'block', margin: 'auto', maxWidth: '100%', height: 'auto' }}
               src={file.url}
               onClick={onImageClick}
             />
@@ -80,6 +88,16 @@ export default function FileView(props) {
             Remove
           </Button>
         </nav>
+        {props.focalPointEnabled ? (
+          <nav className="buttonset">
+            <Button
+              buttonType={props.selectingFocalPoint ? 'primary' : 'muted'}
+              className="button"
+              onClick={props.onToggleFocalPointSelection}>
+              Select focal point
+            </Button>
+          </nav>
+        ) : null}
       </section>
     </Dropzone>
   );

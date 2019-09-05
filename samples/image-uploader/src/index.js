@@ -18,6 +18,16 @@ import {
 
 import './index.css';
 
+const getFocalPointField = sdk => {
+  const {
+    parameters: {
+      instance: { focalPointField }
+    }
+  } = sdk;
+
+  return sdk.entry.fields[focalPointField];
+};
+
 class App extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
@@ -26,7 +36,9 @@ class App extends React.Component {
   state = {
     isDraggingOver: false,
     value: this.props.sdk.field.getValue(this.findProperLocale()),
-    focalPoint: undefined
+    focalPoint: undefined,
+    selectingFocalPoint: false,
+    focalPointEnabled: false
   };
 
   componentDidMount() {
@@ -40,6 +52,19 @@ class App extends React.Component {
         .getAsset(this.state.value.sys.id)
         .then(asset => this.setState({ asset }))
         .catch(() => this.unlinkAsset());
+    }
+
+    const focalPointField = getFocalPointField(this.props.sdk);
+
+    if (focalPointField) {
+      this.setState({
+        focalPoint: focalPointField.getValue() || undefined,
+        focalPointEnabled: true
+      });
+    } else {
+      this.setState({
+        focalPointEnabled: false
+      });
     }
   }
 
@@ -123,10 +148,25 @@ class App extends React.Component {
     this.unlinkAsset();
   };
 
+  onToggleFocalPointSelection = () =>
+    this.setState(state => ({
+      selectingFocalPoint: !state.selectingFocalPoint
+    }));
+
   onSetFocalPoint = focalPoint => {
+    const {
+      parameters: {
+        instance: { focalPointField }
+      }
+    } = this.props.sdk;
+
+    const field = this.props.sdk.entry.fields[focalPointField];
+
     this.setState({
       focalPoint
     });
+
+    field.setValue(focalPoint);
   };
 
   onDragOverEnd = () => {
@@ -406,8 +446,11 @@ class App extends React.Component {
           onDragOverEnd={this.onDragOverEnd}
           onClickEdit={this.onClickEdit}
           onClickRemove={this.onClickRemove}
+          onToggleFocalPointSelection={this.onToggleFocalPointSelection}
+          selectingFocalPoint={this.state.selectingFocalPoint}
           onSetFocalPoint={this.onSetFocalPoint}
           focalPoint={this.state.focalPoint}
+          focalPointEnabled={this.state.focalPointEnabled}
         />
       );
     } else if (!this.state.isDraggingOver && this.state.value) {

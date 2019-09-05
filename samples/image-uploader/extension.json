@@ -2,6 +2,16 @@
   "id": "image-uploader",
   "name": "Image Uploader",
   "srcdoc": "./build/index.html",
+  "parameters": {
+    "instance": [
+      {
+        "id": "focalPointField",
+        "type": "Symbol",
+        "name": "Focal point field",
+        "description": "Id 'JSON object' field to store the focal point"
+      }
+    ]
+  },
   "fieldTypes": [
     "Asset"
   ]
