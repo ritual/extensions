@@ -1,35 +1,46 @@
-import React from "react"
-import {
-  Heading,
-  Button,
-  Paragraph,
-  Asset
-} from "@contentful/forma-36-react-components"
+import React from 'react';
+import { Heading, Button, Paragraph, Asset } from '@contentful/forma-36-react-components';
 
-import Dropzone from "../Dropzone"
+import Dropzone from '../Dropzone';
 
-import "./fileview.css"
+import './fileview.css';
 
 export default function FileView(props) {
-  const file = props.file
-  const type = file.contentType.split("/")[0]
-  const prettySize = `${(file.details.size / 1000000).toFixed(2)} MB`
-  const bg = {
-    backgroundImage: `url(${file.url})`
-  }
+  const file = props.file;
+  const type = file.contentType.split('/')[0];
+  const prettySize = `${(file.details.size / 1000000).toFixed(2)} MB`;
+
+  const onImageClick = e => {
+    var rect = e.target.getBoundingClientRect();
+    var x = e.clientX - rect.left; //x position within the element.
+    var y = e.clientY - rect.top; //y position within the element.
+
+    const { width, height } = file.details.image;
+
+    const widthRatio = width / rect.width;
+    const heightRatio = height / rect.height;
+
+    const actualX = Math.round(x * widthRatio);
+    const actualY = Math.round(y * heightRatio);
+
+    console.log(actualX, actualY);
+  };
 
   return (
     <Dropzone
-      className={`file-view viewport ${
-        type === "image" ? "image-file" : "non-image-file"
-      }`}
+      className={`file-view viewport ${type === 'image' ? 'image-file' : 'non-image-file'}`}
       isDraggingOver={props.isDraggingOver}
       onDrop={props.onDropFiles}
       onDragOverStart={props.onDragOverStart}
-      onDragOverEnd={props.onDragOverEnd}
-    >
-      {type === "image" ? (
-        <header style={bg} />
+      onDragOverEnd={props.onDragOverEnd}>
+      {type === 'image' ? (
+        <header style={{ height: '300px' }}>
+          <img
+            style={{ display: 'block', margin: '0 auto', 'max-width': '100%' }}
+            src={file.url}
+            onClick={onImageClick}
+          />
+        </header>
       ) : (
         <header>
           <Asset type={type} className="file-type-icon" />
@@ -38,10 +49,9 @@ export default function FileView(props) {
       <section className="details">
         <main>
           <Heading className="filename">{file.fileName}</Heading>
-          {type === "image" ? (
+          {type === 'image' ? (
             <Paragraph className="row">
-              <strong>Dimensions:</strong> {file.details.image.width}x
-              {file.details.image.height}
+              <strong>Dimensions:</strong> {file.details.image.width}x{file.details.image.height}
             </Paragraph>
           ) : null}
           <Paragraph className="row">
@@ -51,26 +61,18 @@ export default function FileView(props) {
             <strong>Type:</strong> {file.contentType}
           </Paragraph>
           <Paragraph className="row">
-            <strong>Status:</strong> {props.isPublished ? "Published" : "Draft"}
+            <strong>Status:</strong> {props.isPublished ? 'Published' : 'Draft'}
           </Paragraph>
         </main>
         <nav className="buttonset">
-          <Button
-            buttonType="muted"
-            className="button"
-            onClick={props.onClickEdit}
-          >
+          <Button buttonType="muted" className="button" onClick={props.onClickEdit}>
             Edit
           </Button>
-          <Button
-            buttonType="muted"
-            className="button"
-            onClick={props.onClickRemove}
-          >
+          <Button buttonType="muted" className="button" onClick={props.onClickRemove}>
             Remove
           </Button>
         </nav>
       </section>
     </Dropzone>
-  )
+  );
 }
