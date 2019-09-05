@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heading, Button, Paragraph, Asset } from '@contentful/forma-36-react-components';
+import { FocalPoint } from './FocalPoint';
 
 import Dropzone from '../Dropzone';
 
@@ -11,9 +12,9 @@ export default function FileView(props) {
   const prettySize = `${(file.details.size / 1000000).toFixed(2)} MB`;
 
   const onImageClick = e => {
-    var rect = e.target.getBoundingClientRect();
-    var x = e.clientX - rect.left; //x position within the element.
-    var y = e.clientY - rect.top; //y position within the element.
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left; //x position within the element.
+    const y = e.clientY - rect.top; //y position within the element.
 
     const { width, height } = file.details.image;
 
@@ -23,6 +24,10 @@ export default function FileView(props) {
     const actualX = Math.round(x * widthRatio);
     const actualY = Math.round(y * heightRatio);
 
+    props.onSetFocalPoint({
+      x: rect.left + x,
+      y: rect.top + y,
+    });
     console.log(actualX, actualY);
   };
 
@@ -35,11 +40,14 @@ export default function FileView(props) {
       onDragOverEnd={props.onDragOverEnd}>
       {type === 'image' ? (
         <header style={{ height: '300px' }}>
-          <img
-            style={{ display: 'block', margin: '0 auto', 'max-width': '100%' }}
-            src={file.url}
-            onClick={onImageClick}
-          />
+          <div style={{ position: 'relative' }}>
+            <img
+              style={{ display: 'block', margin: '0 auto', maxWidth: '100%' }}
+              src={file.url}
+              onClick={onImageClick}
+            />
+            {props.focalPoint && <FocalPoint focalPoint={props.focalPoint} />}
+          </div>
         </header>
       ) : (
         <header>
