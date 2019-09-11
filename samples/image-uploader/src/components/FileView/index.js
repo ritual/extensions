@@ -6,6 +6,22 @@ import Dropzone from '../Dropzone';
 
 import './fileview.css';
 
+function calculateFocalPoint(file, rect, focalPoint) {
+  const { width, height } = file.details.image;
+  const widthRatio = width / rect.width;
+  const heightRatio = height / rect.height;
+
+  const x = rect.left + Math.round(focalPoint.x / widthRatio);
+  const y = rect.top + Math.round(focalPoint.y / heightRatio);
+
+  return {
+    x,
+    y
+  };
+}
+
+let imageRef = React.createRef();
+
 export default function FileView(props) {
   const file = props.file;
   const type = file.contentType.split('/')[0];
@@ -29,10 +45,9 @@ export default function FileView(props) {
     const actualY = Math.round(y * heightRatio);
 
     props.onSetFocalPoint({
-      x: rect.left + x,
-      y: rect.top + y
+      x: actualX,
+      y: actualY
     });
-    console.log(actualX, actualY);
   };
 
   return (
@@ -48,13 +63,22 @@ export default function FileView(props) {
             height: '300px',
             cursor: props.selectingFocalPoint ? 'crosshair' : 'auto'
           }}>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', height: '100%' }}>
             <img
-              style={{ display: 'block', margin: 'auto', maxWidth: '100%', height: 'auto' }}
+              style={{ display: 'block', margin: 'auto', maxWidth: '100%', maxHeight: '100%' }}
               src={file.url}
               onClick={onImageClick}
+              ref={imageRef}
             />
-            {props.focalPoint && <FocalPoint focalPoint={props.focalPoint} />}
+            {!!file && !!imageRef.current && props.focalPoint && (
+              <FocalPoint
+                focalPoint={calculateFocalPoint(
+                  file,
+                  imageRef.current.getBoundingClientRect(),
+                  props.focalPoint
+                )}
+              />
+            )}
           </div>
         </header>
       ) : (
@@ -97,6 +121,14 @@ export default function FileView(props) {
               Select focal point
             </Button>
           </nav>
+        ) : null}
+        {props.focalPoint ? (
+          <Button
+            buttonType="muted"
+            className="button"
+            onClick={props.showFocalPointDemoModal}>
+            Preview focal point
+          </Button>
         ) : null}
       </section>
     </Dropzone>

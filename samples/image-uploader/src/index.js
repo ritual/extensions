@@ -4,10 +4,11 @@ import ReactDOM from 'react-dom';
 import '@contentful/forma-36-react-components/dist/styles.css';
 
 import { Spinner } from '@contentful/forma-36-react-components';
-import { init } from 'contentful-ui-extensions-sdk';
+import { init, locations } from 'contentful-ui-extensions-sdk';
 import UploadView from './components/UploadView';
 import ProgressView from './components/ProgressView';
 import FileView from './components/FileView';
+import DialogView from './components/DialogView';
 import {
   readFileAsUrl,
   findImageContentType,
@@ -170,7 +171,6 @@ class App extends React.Component {
     });
 
     field.setValue(focalPoint);
-    console.log(focalPoint);
   };
 
   onDragOverEnd = () => {
@@ -426,6 +426,17 @@ class App extends React.Component {
     });
   }
 
+  showFocalPointDemoModal = () => {
+    this.props.sdk.dialogs.openExtension({
+      id: 'image-uploader',
+      width: 1000,
+      parameters: {
+        file: this.state.asset.fields.file[this.findProperLocale()],
+        focalPoint: this.state.focalPoint
+      }
+    });
+  };
+
   render = () => {
     if (this.state.uploading) {
       return (
@@ -455,6 +466,7 @@ class App extends React.Component {
           onSetFocalPoint={this.onSetFocalPoint}
           focalPoint={this.state.focalPoint}
           focalPointEnabled={this.state.focalPointEnabled}
+          showFocalPointDemoModal={this.showFocalPointDemoModal}
         />
       );
     } else if (!this.state.isDraggingOver && this.state.value) {
@@ -479,8 +491,26 @@ class App extends React.Component {
   };
 }
 
+function renderDialog(sdk) {
+  const { invocation: otherProps } = sdk.parameters;
+  const container = document.createElement('div');
+  container.id = 'focal-point-preview';
+  document.body.appendChild(container);
+
+  sdk.window.startAutoResizer();
+
+  ReactDOM.render(
+    <DialogView sdk={sdk} onClose={() => sdk.close()} {...otherProps} />,
+    document.getElementById('focal-point-preview')
+  );
+}
+
 init(sdk => {
-  ReactDOM.render(<App sdk={sdk} />, document.getElementById('root'));
+  if (sdk.location.is(locations.LOCATION_DIALOG)) {
+    renderDialog(sdk);
+  } else {
+    ReactDOM.render(<App sdk={sdk} />, document.getElementById('root'));
+  }
 });
 
 if (module.hot) {
